@@ -14,7 +14,6 @@ type Weather = {
 const App: React.FC = () => {
     const [data, setData] = useState<AxiosResponse | any>(null);
     const [weather, setWeather] = useState<Weather | null>();
-    console.log(import.meta.env);
     useEffect(() => {
         axios
             .get(
@@ -59,7 +58,7 @@ const App: React.FC = () => {
         setWeather({ image, temperature, humidity, wind, description, city });
     }, [data]);
     return (
-        <div className="w-screen flex justify-center items-center bg-[#04263E] px-10 py-20">
+        <div className="w-screen flex justify-center items-center px-10 py-20">
             <div className="w-80 rounded-xl h-2/3 p-5 bg-gray-100 flex flex-col justify-evenly">
                 <div className="flex gap-1 items-center">
                     <BsPinMapFill />
