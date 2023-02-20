@@ -14,10 +14,12 @@ type Weather = {
 const App: React.FC = () => {
     const [data, setData] = useState<AxiosResponse | any>(null);
     const [weather, setWeather] = useState<Weather | null>();
+    console.log(import.meta.env);
     useEffect(() => {
         axios
             .get(
-                `https://api.openweathermap.org/data/2.5/weather?q=SaiGon&&units=metric&appid=57bd40b5b3815bd818f41385fe75207b`
+                `https://api.openweathermap.org/data/2.5/weather?q=SaiGon&&units=metric&appid=${import.meta.env.VITE_API_KEY
+                }`
             )
             .then((result: AxiosResponse) => setData(result.data));
     }, []);
@@ -57,13 +59,13 @@ const App: React.FC = () => {
         setWeather({ image, temperature, humidity, wind, description, city });
     }, [data]);
     return (
-        <div className="w-screen h-screen flex justify-center items-center bg-[#04263E] px-10 py-20">
+        <div className="w-screen flex justify-center items-center bg-[#04263E] px-10 py-20">
             <div className="w-80 rounded-xl h-2/3 p-5 bg-gray-100 flex flex-col justify-evenly">
                 <div className="flex gap-1 items-center">
                     <BsPinMapFill />
                     <input
                         type="text"
-                        className="flex-1 outline-none text-md uppercase"
+                        className="flex-1 outline-none text-md uppercase px-1 py-2 rounded"
                         placeholder="Search"
                     />
                     <button className="p-2 rounded-full bg-sky-500 text-white">
