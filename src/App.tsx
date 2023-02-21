@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { BsPinMapFill, BsSearch, BsWater, BsWind } from 'react-icons/bs';
+import { BsWater, BsWind } from 'react-icons/bs';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SearchForm } from './SearchForm';
 
 type Weather = {
     image: string;
@@ -13,22 +15,25 @@ type Weather = {
 
 const App: React.FC = () => {
     const [data, setData] = useState<AxiosResponse | any>(null);
-    const [weather, setWeather] = useState<Weather | null>();
-    const [location, setLocation] = useState<string>('SaiGon');
     const [error, setError] = useState<AxiosError | any>(null);
+    const [weather, setWeather] = useState<Weather | null>();
+    const [location, setLocation] = useState<string>('');
+    const [showBox, setShowBox] = useState<boolean>(false);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         axios
             .get(
-                `https://api.openweathermap.org/data/2.5/weather?q=${location}&&units=metric&appid=${
+                `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${
                     import.meta.env.VITE_API_KEY
                 }`
             )
             .then((result: AxiosResponse) => setData(result.data))
             .catch((e: AxiosError) => {
                 setError(e.response);
-            });
+                setData(null);
+            })
+            .finally(() => setShowBox(true));
     };
 
     useEffect(() => {
@@ -76,60 +81,58 @@ const App: React.FC = () => {
 
     return (
         <div className="w-screen flex justify-center items-center px-10 py-20">
-            <div className="w-80 rounded-xl h-2/3 p-5 bg-gray-100 flex flex-col justify-evenly">
-                <form
-                    className="flex gap-1 items-center"
-                    onSubmit={handleSubmit}
+            <AnimatePresence>
+                <motion.div
+                    className="w-80 rounded-xl h-2/3 p-5 bg-gray-100 flex flex-col opacity-0"
+                    animate={{ opacity: 1 }}
+                    transition={{ type: 'tween' }}
+                    layout="size"
                 >
-                    <BsPinMapFill />
-                    <input
-                        type="text"
-                        className="flex-1 outline-none text-md uppercase px-1 py-2 rounded placeholder:capitalize"
-                        placeholder="Enter your location"
-                        onChange={handleOnChange}
+                    <SearchForm
+                        handleOnChange={handleOnChange}
+                        handleSubmit={handleSubmit}
                     />
-                    <button
-                        className="p-2 rounded-full bg-sky-300"
-                        type="submit"
+                    <motion.div
+                        className="text-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: showBox ? 1 : 0 }}
+                        exit={{ opacity: 0 }}
                     >
-                        <BsSearch />
-                    </button>
-                </form>
-                <div className="text-center">
-                    <img
-                        src={`${weather?.image}`}
-                        className="w-1/2 mx-auto my-4"
-                    />
-                    <p>{weather?.city}</p>
+                        <img
+                            src={`${weather?.image}`}
+                            className="w-1/2 mx-auto my-4 object-cover"
+                        />
+                        <p>{weather?.city}</p>
+                        {data && (
+                            <p className="relative text-4xl font-bold py-4">
+                                {weather?.temperature}
+                                <span className="absolute -top-1 text-2xl font-medium">
+                                    °C
+                                </span>
+                            </p>
+                        )}
+                        <p className="capitalize">{weather?.description}</p>
+                    </motion.div>
                     {data && (
-                        <p className="relative text-4xl font-bold py-4">
-                            {weather?.temperature}
-                            <span className="absolute -top-1 text-2xl font-medium">
-                                °C
-                            </span>
-                        </p>
+                        <div className="flex justify-between items-center py-4">
+                            <div className="flex justify-between gap-2 items-center">
+                                <BsWater className="text-4xl" />
+                                <div>
+                                    <span>{weather?.humidity}%</span>
+                                    <p>Humidity</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-between gap-2 items-center">
+                                <BsWind className="text-4xl" />
+                                <div>
+                                    <span>{weather?.wind}Km/h</span>
+                                    <p>Wind Speed</p>
+                                </div>
+                            </div>
+                        </div>
                     )}
-                    <p className="capitalize">{weather?.description}</p>
-                </div>
-                {data && (
-                    <div className="flex justify-between items-center py-4">
-                        <div className="flex justify-between gap-2 items-center">
-                            <BsWater className="text-4xl" />
-                            <div>
-                                <span>{weather?.humidity}%</span>
-                                <p>Humidity</p>
-                            </div>
-                        </div>
-                        <div className="flex justify-between gap-2 items-center">
-                            <BsWind className="text-4xl" />
-                            <div>
-                                <span>{weather?.wind}Km/h</span>
-                                <p>Wind Speed</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 };
