@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { BsPinMapFill, BsSearch, BsWater, BsWind } from 'react-icons/bs';
 
 type Weather = {
@@ -14,14 +14,22 @@ type Weather = {
 const App: React.FC = () => {
     const [data, setData] = useState<AxiosResponse | any>(null);
     const [weather, setWeather] = useState<Weather | null>();
-    useEffect(() => {
+    const [location, setLocation] = useState<string>('SaiGon');
+    const [error, setError] = useState<AxiosError | any>(null);
+
+    const searchHandler = () => {
         axios
             .get(
-                `https://api.openweathermap.org/data/2.5/weather?q=SaiGon&&units=metric&appid=${import.meta.env.VITE_API_KEY
+                `https://api.openweathermap.org/data/2.5/weather?q=${location}&&units=metric&appid=${
+                    import.meta.env.VITE_API_KEY
                 }`
             )
-            .then((result: AxiosResponse) => setData(result.data));
-    }, []);
+            .then((result: AxiosResponse) => setData(result.data))
+            .catch((e: AxiosError) => {
+                setError(e.response);
+            });
+    };
+
     useEffect(() => {
         let image = '',
             temperature = 0,
@@ -54,9 +62,17 @@ const App: React.FC = () => {
             wind = data.wind.speed;
             description = data.weather[0].description;
             city = data.name;
+        } else if (error) {
+            image = '/images/404.png';
+            city = 'Oop! Ivalid location :/';
         }
         setWeather({ image, temperature, humidity, wind, description, city });
-    }, [data]);
+    }, [data, error]);
+
+    const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocation(e.target.value);
+    };
+
     return (
         <div className="w-screen flex justify-center items-center px-10 py-20">
             <div className="w-80 rounded-xl h-2/3 p-5 bg-gray-100 flex flex-col justify-evenly">
@@ -64,10 +80,14 @@ const App: React.FC = () => {
                     <BsPinMapFill />
                     <input
                         type="text"
-                        className="flex-1 outline-none text-md uppercase px-1 py-2 rounded"
-                        placeholder="Search"
+                        className="flex-1 outline-none text-md uppercase px-1 py-2 rounded placeholder:capitalize"
+                        placeholder="Enter your location"
+                        onChange={handleOnChange}
                     />
-                    <button className="p-2 rounded-full bg-sky-500 text-white">
+                    <button
+                        className="p-2 rounded-full bg-sky-300"
+                        onClick={searchHandler}
+                    >
                         <BsSearch />
                     </button>
                 </div>
@@ -77,30 +97,34 @@ const App: React.FC = () => {
                         className="w-1/2 mx-auto my-4"
                     />
                     <p>{weather?.city}</p>
-                    <p className="relative text-4xl font-bold py-4">
-                        {weather?.temperature}
-                        <span className="absolute -top-1 text-2xl font-medium">
-                            °C
-                        </span>
-                    </p>
+                    {data && (
+                        <p className="relative text-4xl font-bold py-4">
+                            {weather?.temperature}
+                            <span className="absolute -top-1 text-2xl font-medium">
+                                °C
+                            </span>
+                        </p>
+                    )}
                     <p className="capitalize">{weather?.description}</p>
                 </div>
-                <div className="flex justify-between items-center py-4">
-                    <div className="flex justify-between gap-2 items-center">
-                        <BsWater className="text-4xl" />
-                        <div>
-                            <span>{weather?.humidity}%</span>
-                            <p>Humidity</p>
+                {data && (
+                    <div className="flex justify-between items-center py-4">
+                        <div className="flex justify-between gap-2 items-center">
+                            <BsWater className="text-4xl" />
+                            <div>
+                                <span>{weather?.humidity}%</span>
+                                <p>Humidity</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-between gap-2 items-center">
+                            <BsWind className="text-4xl" />
+                            <div>
+                                <span>{weather?.wind}Km/h</span>
+                                <p>Wind Speed</p>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex justify-between gap-2 items-center">
-                        <BsWind className="text-4xl" />
-                        <div>
-                            <span>{weather?.wind}Km/h</span>
-                            <p>Wind Speed</p>
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );
