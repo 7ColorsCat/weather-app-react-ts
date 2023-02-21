@@ -17,7 +17,8 @@ const App: React.FC = () => {
     const [location, setLocation] = useState<string>('SaiGon');
     const [error, setError] = useState<AxiosError | any>(null);
 
-    const searchHandler = () => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         axios
             .get(
                 `https://api.openweathermap.org/data/2.5/weather?q=${location}&&units=metric&appid=${
@@ -76,7 +77,10 @@ const App: React.FC = () => {
     return (
         <div className="w-screen flex justify-center items-center px-10 py-20">
             <div className="w-80 rounded-xl h-2/3 p-5 bg-gray-100 flex flex-col justify-evenly">
-                <div className="flex gap-1 items-center">
+                <form
+                    className="flex gap-1 items-center"
+                    onSubmit={handleSubmit}
+                >
                     <BsPinMapFill />
                     <input
                         type="text"
@@ -86,11 +90,11 @@ const App: React.FC = () => {
                     />
                     <button
                         className="p-2 rounded-full bg-sky-300"
-                        onClick={searchHandler}
+                        type="submit"
                     >
                         <BsSearch />
                     </button>
-                </div>
+                </form>
                 <div className="text-center">
                     <img
                         src={`${weather?.image}`}
