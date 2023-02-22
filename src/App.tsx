@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { BsWater, BsWind } from 'react-icons/bs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SearchForm } from './SearchForm';
+import images from './images';
 
 type Weather = {
     image: string;
@@ -46,22 +47,22 @@ const App: React.FC = () => {
         if (data) {
             switch (data.weather[0].main) {
                 case 'Clouds':
-                    image = '/images/cloud.png';
+                    image = images.cloud;
                     break;
                 case 'Clear':
-                    image = '/images/clear.png';
+                    image = images.clear;
                     break;
                 case 'Rain':
-                    image = '/images/rain.png';
+                    image = images.rain;
                     break;
                 case 'Snow':
-                    image = '/images/snow.png';
+                    image = images.snow;
                     break;
                 case 'Haze':
-                    image = '/images/mist.png';
+                    image = images.mist;
                     break;
                 default:
-                    image = '';
+                    image = images.not_found;
             }
             temperature = data.main.temp;
             humidity = data.main.humidity;
@@ -69,7 +70,7 @@ const App: React.FC = () => {
             description = data.weather[0].description;
             city = data.name;
         } else if (error) {
-            image = '/images/404.png';
+            image = images.not_found;
             city = 'Oop! Ivalid location :/';
         }
         setWeather({ image, temperature, humidity, wind, description, city });
